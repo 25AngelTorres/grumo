@@ -1,0 +1,77 @@
+<?php
+	/*
+	Contine las clases para manejar la barra lateral 
+	*/
+
+	class controlSidebar extends modelModelo{
+		public $muestra_errores = false;
+		
+		//Constructor de clase
+		function __construct(){
+			 parent::conexion();
+		}
+		
+		public function get_dropdown(){
+			/*
+				<li class="nav-item dropdown ">
+				  <a class="nav-link dropdown-toggle" href="#" id="pagesDropdown" role="button">
+					<i class="fas fa-folder"></i>
+					<span>Loca</span>
+				  </a>
+				  <div class="dropdown-menu dropdown-menu-sidebar " >
+					<h6 class="dropdown-header">Subproceso:</h6>
+					<a class="dropdown-item" href="doc.php?doc=1">Login</a>
+					<a class="dropdown-item" href="doc.php?doc=2">Register</a>
+					
+					<div class="dropdown-divider"></div>
+					<h6 class="dropdown-header">Other Subproceso:</h6>
+					<a class="dropdown-item" href="404.html">404 Page</a>
+					<a class="dropdown-item" href="blank.html">Blank Page</a>
+				  </div>
+				</li>
+				*/
+			$proceso 	= new modelProceso();
+			$subproceso = new modelSubproceso();
+			$documento	= new modelDocumento();
+			$permiso	= new modelPermiso_Documento();
+						
+			//Obtener registros de PROCESO
+			$rsProceso = $this->consulta_sql("Select * from proceso");
+			$rowsProceso = $rsProceso->GetArray();
+			
+			$lista="";
+			foreach ($rowsProceso as $key => $valueProceso) {
+				$lista.=	'<li class="nav-item dropdown">
+								<a class="nav-link dropdown-toggle" href="#" id="dropdown-toggle'.$valueProceso['id_proceso'].'" role = "button" >
+								<i class="fas fa-layer-group"></i>
+									<span>'.$valueProceso['name'].'</span>
+								</a>
+								<div class="dropdown-menu dropdown-menu-sidebar" id="menu-dropdown-toggle'.$valueProceso['id_proceso'].'" >';
+								
+				//Obtener registros de Subproceso
+				$rsSubproceso = $this->consulta_sql("Select * from SUBPROCESO where id_proceso = ".$valueProceso['id_proceso']);
+				$rowsSubproceso = $rsSubproceso->GetArray();
+				if(count($rowsSubproceso) > 0){
+					foreach ($rowsSubproceso as $key1 => $valueSubproceso) {
+						$lista.='<h6 class="dropdown-header">'.$valueSubproceso['name'].':</h6>';
+						
+						//Obtener registros de Documento
+						$rsDocumento= $this->consulta_sql("Select * from DOCUMENTO where id_subproceso = ".$valueSubproceso['id_subproceso']);
+						$rowsDocumento= $rsDocumento->GetArray();
+						if(count($rowsDocumento) > 0){
+							foreach ($rowsDocumento as $key2 => $valueDocumento) {
+								$lista.='<a class="dropdown-item" href="doc.php?doc='.$valueDocumento['id_documento'].'">'.$valueDocumento['clave'].' '.$valueDocumento['name'].'</a>';
+							}
+						}
+						$lista.='<div class="dropdown-divider"></div>';
+					}
+				}
+				$lista.='</div>
+						</li>';
+			}
+			return $lista;
+			
+		}
+		
+	}
+?>
